@@ -18,7 +18,7 @@ version_added: '1.1.0'
 options:
   name:
     description:
-      - Feature flag name.
+      - Feature flag name, or 'all' to enable all features.
     type: str
     required: true
   node:
@@ -56,13 +56,18 @@ class RabbitMqFeatureFlag(object):
 
     def get_flag_state(self):
         global_parameters = self._exec(['list_feature_flags'], True)
+        all_enabled = True
 
         for param_item in global_parameters:
             name, state = param_item.split('\t')
+            if name != 'name' and state != 'enabled':
+                all_enabled = false
             if name == self.name:
                 if state == 'enabled':
                     return 'enabled'
                 return 'disabled'
+        if self.name == 'all' and not all_enabled:
+            return 'disabled'
         return 'unavailable'
 
     def enable(self):
@@ -88,7 +93,7 @@ def main():
     if rabbitmq_feature_flag.state == 'disabled':
         rabbitmq_feature_flag.enable()
         result['changed'] = True
-    if rabbitmq_feature_flag.state == 'unavailable':
+    elif rabbitmq_feature_flag.state == 'unavailable':
         module.fail_json(msg="%s feature flag is not available" % (name))
 
     module.exit_json(**result)
