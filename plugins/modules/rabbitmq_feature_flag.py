@@ -67,8 +67,10 @@ class RabbitMqFeatureFlag(object):
                 if state == 'enabled':
                     return 'enabled'
                 return 'disabled'
-        if self.name == 'all' and not all_enabled:
-            return 'disabled'
+        if self.name == 'all':
+            if not all_enabled:
+                return 'disabled'
+            return 'enabled'
         return 'unavailable'
 
     def enable(self):
