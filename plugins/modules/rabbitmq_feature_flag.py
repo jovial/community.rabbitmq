@@ -60,8 +60,9 @@ class RabbitMqFeatureFlag(object):
 
         for param_item in global_parameters:
             name, state = param_item.split('\t')
+            # NOTE: We have skip the header line. It would be easier if we used --formatter json.
             if name != 'name' and state != 'enabled':
-                all_enabled = false
+                all_enabled = False
             if name == self.name:
                 if state == 'enabled':
                     return 'enabled'
